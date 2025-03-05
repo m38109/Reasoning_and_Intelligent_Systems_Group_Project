@@ -1,0 +1,198 @@
+# Genetic Algorithm to Solve a 4x4 Letter Grid Puzzle
+
+Function InitializePopulation(size, grid)
+    population = []
+    For i to size Do
+        new_grid = copy(grid)
+        For i to size Do
+        new_grid = copy(grid)
+        For each row in a grid
+            missing_letter = LETTER - exiting letter
+            fill in empty cell with the missing_letter in random order
+        End For
+        population.append(new_grid)
+    End For
+    return population
+End Function
+
+
+#The goal is to find any individual total_conflict = 0, lower is better
+Function Fitness(grid)
+    row_conflict = CountRowConflicts(grid)
+    column_conflict = CountColumnConflicts(grid)
+    sub_grid_conflict = CountSubGridConflicts(grid)
+    total_conflict = row_conflict + column_conflict + sub_grid_conflict
+    return total_conflict
+End Function
+
+Function CountRowConflicts(grid)
+    conflict_count = 0
+    For each row in grid Do
+        unique_letters = Set()
+        For each letter in row Do
+            If letter in unique_letters Then
+                conflict_count += 1
+            Else
+                unique_letters.add(letter)
+            End if
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function CountColumnConflicts(grid)
+    conflict_count = 0
+    For each column in grid Do
+        unique_letters = Set()
+        For each letter in column Do
+            If letter in unique_letters Then
+                conflict_count += 1
+            Else
+                unique_letters.add(letter)
+            End if
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function CountSubGridConflicts(grid)
+    conflict_count = 0
+    sub_grid_positions = [(0,0), (0,2), (2,0), (2,2)]
+    For each (start_row, start_column) in sub_grid_positions Do
+        unique_letter = Set ()
+        For i from 0 to 1 Do
+            For j from 0 to 1 Do
+                letter = grid[start_row + i][start_column + j]
+                If letter in unique_letter Then
+                    conflict_counts += 1
+                Else
+                    unique_letter.add(letter)
+                End If
+            End For
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function CountRowConflicts(grid)
+    conflict_count = 0
+    For each row in grid Do
+        unique_letters = Set()
+        For each letter in row Do
+            If letter in unique_letters Then
+                conflict_count += 1
+            Else
+                unique_letters.add(letter)
+            End If
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function CountColumnConflicts(grid)
+    conflict_count = 0
+    For col from 0 to 3 Do
+        unique_letters = Set()
+        For row from 0 to 3 Do
+            letter = grid[row][col]
+            If letter in unique_letters Then
+                conflict_count += 1
+            Else
+                unique_letters.add(letter)
+            End If
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function CountSubGridConflicts(grid)
+    conflict_count = 0
+    sub_grid_positions = [(0,0), (0,2), (2,0), (2,2)]
+    For each (start_row, start_col) in sub_grid_positions Do
+        unique_letters = Set()
+        For i from 0 to 1 Do
+            For j from 0 to 1 Do
+                letter = grid[start_row + i][start_col + j]
+                If letter in unique_letters Then
+                    conflict_count += 1
+                Else
+                    unique_letters.add(letter)
+                End If
+            End For
+        End For
+    End For
+    return conflict_count
+End Function
+
+Function Selection(population, tournament_size)
+    best_grid = Null
+    best_fitness = Infinity
+    For i to tournament_size Do
+        candidate = Random individual from population
+        candidate_fitness = Fitness(candidate)
+        If candidate_fitness < best_fitness Then
+            best_grid = candidate
+            best_fitness = candidate_fitness
+        End If
+    End For
+    return best_grid
+End Function
+
+Function Crossover(parent1, parent2)
+    crossover_point = Random number between 1 and 3
+    offspring1 = copy(parent1)
+    offspring2 = copy(parent2)
+    For i from crossover_point to 3 Do
+        swap offspring1[i] and offspring2[i]
+    End For
+    return offspring1, offspring2
+End Function
+
+Function Mutation(grid)
+    mutation_rate = 0.1
+    For each row in grid Do
+        If Random number between 0 and 1 < mutation_rate Then
+            col1 = Random column index
+            col2 = Random column index (different from col1)
+            swap grid[row][col1] and grid[row][col2]
+        End If
+    End For
+    return grid
+End Function
+
+Function GeneticAlgorithm(initial_grid, max_generations, tournament_size, population_size, target_word)
+    population = InitializePopulation(population_size, initial_grid)
+    solutions = []
+
+    For generation from 1 to max_generations Do
+        sorted_population = Sort population by Fitness (ascending order)
+
+        # Check for solutions
+        For each individual in sorted_population Do
+            If Fitness(individual) == 0 Then
+                solutions.append(individual)
+        End For
+
+        If Length of solutions > 0 Then
+            Continue searching for more solutions
+
+        new_population = []
+        For i to population_size/2 Do
+            parent1 = Selection(population, tournament_size)
+            parent2 = Selection(population, tournament_size)
+            offspring1, offspring2 = Crossover(parent1, parent2)
+            offspring1 = Mutation(offspring1)
+            offspring2 = Mutation(offspring2)
+            new_population.append(offspring1)
+            new_population.append(offspring2)
+        End For
+
+        population = new_population
+    End For
+
+    If Length of solutions > 0 Then
+        Return solutions
+    Else
+        Return "No solution found, reached the max generation"
+    End IF
+End Function
