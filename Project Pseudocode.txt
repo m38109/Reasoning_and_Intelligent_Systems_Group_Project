@@ -25,106 +25,7 @@ Function Fitness(grid)
     return total_conflict
 End Function
 
-Function CountRowConflicts(grid)
-    conflict_count = 0
-    For each row in grid Do
-        unique_letters = Set()
-        For each letter in row Do
-            If letter in unique_letters Then
-                conflict_count += 1
-            Else
-                unique_letters.add(letter)
-            End if
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function CountColumnConflicts(grid)
-    conflict_count = 0
-    For each column in grid Do
-        unique_letters = Set()
-        For each letter in column Do
-            If letter in unique_letters Then
-                conflict_count += 1
-            Else
-                unique_letters.add(letter)
-            End if
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function CountSubGridConflicts(grid)
-    conflict_count = 0
-    sub_grid_positions = [(0,0), (0,2), (2,0), (2,2)]
-    For each (start_row, start_column) in sub_grid_positions Do
-        unique_letter = Set ()
-        For i from 0 to 1 Do
-            For j from 0 to 1 Do
-                letter = grid[start_row + i][start_column + j]
-                If letter in unique_letter Then
-                    conflict_counts += 1
-                Else
-                    unique_letter.add(letter)
-                End If
-            End For
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function CountRowConflicts(grid)
-    conflict_count = 0
-    For each row in grid Do
-        unique_letters = Set()
-        For each letter in row Do
-            If letter in unique_letters Then
-                conflict_count += 1
-            Else
-                unique_letters.add(letter)
-            End If
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function CountColumnConflicts(grid)
-    conflict_count = 0
-    For col from 0 to 3 Do
-        unique_letters = Set()
-        For row from 0 to 3 Do
-            letter = grid[row][col]
-            If letter in unique_letters Then
-                conflict_count += 1
-            Else
-                unique_letters.add(letter)
-            End If
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function CountSubGridConflicts(grid)
-    conflict_count = 0
-    sub_grid_positions = [(0,0), (0,2), (2,0), (2,2)]
-    For each (start_row, start_col) in sub_grid_positions Do
-        unique_letters = Set()
-        For i from 0 to 1 Do
-            For j from 0 to 1 Do
-                letter = grid[start_row + i][start_col + j]
-                If letter in unique_letters Then
-                    conflict_count += 1
-                Else
-                    unique_letters.add(letter)
-                End If
-            End For
-        End For
-    End For
-    return conflict_count
-End Function
-
-Function Selection(population, tournament_size)
+Function Tournament_Selection(population, tournament_size)
     best_grid = Null
     best_fitness = Infinity
     For i to tournament_size Do
@@ -138,14 +39,19 @@ Function Selection(population, tournament_size)
     return best_grid
 End Function
 
+Function Parents_selection(population, tournament_size)
+    select different parents via tournament_selection
+    return parent1, parent2
+End Function
+
 Function Crossover(parent1, parent2)
     crossover_point = Random number between 1 and 3
-    offspring1 = copy(parent1)
-    offspring2 = copy(parent2)
-    For i from crossover_point to 3 Do
-        swap offspring1[i] and offspring2[i]
+    child= copy(parent1)
+    For i from crossover_point to 3 Do #
+        For j in range(4)
+        child[i][j] = parent2[i][j]
     End For
-    return offspring1, offspring2
+    return child
 End Function
 
 Function Mutation(grid)
