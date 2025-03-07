@@ -68,7 +68,7 @@ End Function
 
 Function GeneticAlgorithm(initial_grid, max_generations, tournament_size, population_size, target_word)
     population = InitializePopulation(population_size, initial_grid)
-    solutions = []
+    solutions = {}
 
     For generation from 1 to max_generations Do
         sorted_population = Sort population by Fitness (ascending order)
@@ -79,26 +79,18 @@ Function GeneticAlgorithm(initial_grid, max_generations, tournament_size, popula
                 solutions.append(individual)
         End For
 
-        If Length of solutions > 0 Then
-            Continue searching for more solutions
 
-        new_population = []
-        For i to population_size/2 Do
-            parent1 = Selection(population, tournament_size)
-            parent2 = Selection(population, tournament_size)
-            offspring1, offspring2 = Crossover(parent1, parent2)
-            offspring1 = Mutation(offspring1)
-            offspring2 = Mutation(offspring2)
-            new_population.append(offspring1)
-            new_population.append(offspring2)
-        End For
+        new_population = top 4 individual
+        While new_population size < population_size Do
+            parent1, parent2 = Parents_selection(population, tournament_size)
+            child = Crossover(parent1, parent2)
+            mutated_child = mutation(child, initial_grid)
+            new_population.append(mutated_child)
 
         population = new_population
     End For
 
-    If Length of solutions > 0 Then
-        Return solutions
-    Else
-        Return "No solution found, reached the max generation"
-    End IF
+
+    Return Solutions or "No solution found, reached the max generation"
+
 End Function
