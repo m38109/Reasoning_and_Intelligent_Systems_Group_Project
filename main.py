@@ -1,14 +1,13 @@
 import copy
 import random
 
-
 LETTER = ['A', 'B', 'C', 'D']
 
-def initialize_population(size, grid):
+def initialize_population(population_size, grid):
     population = []
     letter = set(LETTER)  # Define the complete set of letters
 
-    for _ in range(size):
+    for _ in range(population_size):
         new_grid = copy.deepcopy(grid)
 
         for row in new_grid:
@@ -99,16 +98,94 @@ def parent_selection(population, tournament_size):
     return parent1, parent2
 
 
-def crossover(parent1, parent2, initial_grid):
-    """Crossover between two parents """
+def crossover(parent1, parent2):
+    """Crossover between parent1 and parent2"""
     crossover_point = random.randint(1,3)
     child = copy.deepcopy(parent1)
 
+    """Swap the entire row to ensure row validity"""
     for i in range(crossover_point,4):
+        """From the crossover_point row to the last row"""
         for j in range(4):
-            if initial_grid[i][j] == ' ':
-                child[i][j]= parent2[i][j]
+            """Swap all four columns values"""""
+            child[i][j]= parent2[i][j]
     return child
+
+# Updated mutation function (ensures only blank spaces are mutated)
+def mutation(grid, initial_grid):
+    """Mutate by swapping letters in originally blank positions."""
+    mutation_rate = 1 # Increase rate for testing (can be adjusted)
+    for row in range(4):
+        if random.random() < mutation_rate:
+            # Identify blank positions from the initial grid
+            empty_positions = [col for col in range(4) if initial_grid[row][col] == '']
+            if len(empty_positions) >= 2:
+                col1, col2 = random.sample(empty_positions, 2)  # Choose two different empty positions
+                grid[row][col1], grid[row][col2] = grid[row][col2], grid[row][col1]  # Swap them
+    return grid
+
+"""Main Genetic Algorithm Function"""
+def genetic_algorithm(population_size,tournament_size, initial_grid, max_generations):
+    # prepare initial population
+    population = initialize_population(population_size, initial_grid)
+    solutions={}
+
+    for generation in range(1, max_generations+1):
+        population.sort(key=fitness)
+
+        for individual in population:
+            if fitness(individual) == 0:
+                solution_tuple = tuple(map(tuple, individual))
+                if solution_tuple not in solutions:
+                    solutions[solution_tuple] = generation
+
+        if solutions and len(solutions) >= 5:
+            break
+
+        # Keep the top 5 (elitism) to ensure best solutions are not lost
+        new_population = population[:5]
+
+        # Generate new individuals to maintain population size
+        while len(new_population) < population_size:
+            parent1, parent2 = parent_selection(population, tournament_size)
+            child = crossover(parent1, parent2)
+            mutated_child = mutation(child, initial_grid)
+            new_population.append(mutated_child)
+
+        population = new_population
+
+        # Print progress for monitoring
+        if generation % 50 == 0:
+            # Print best fitness in current generation
+            best_dup = fitness(population[0])
+            print(f"Generation {generation}: Best fitness = {best_dup}")
+
+    return [(list(map(list, sol)), gen) for sol, gen in
+            solutions.items()] if solutions else "No solution found, reached the max generation"
+
+
+# Example usage
+
+
+def print_grid(grid):
+    for row in grid:
+        print(" ".join(row))
+
+
+initial_grid = [['C', '', '', 'D'],
+                ['', '', 'A', ''],
+                ['', '', '', ''],
+                ['D', '', '', 'A']]
+
+solutions = genetic_algorithm(population_size=20, tournament_size=3, initial_grid=initial_grid, max_generations=500)
+if isinstance(solutions, str):
+    print(solutions)
+else:
+    print("Solutions found:")
+    for idx, (sol, gen) in enumerate(solutions, 1):
+        print(f"Solution {idx} (Found at Generation {gen}):")
+        print_grid(sol)
+        print()
 
 
 
