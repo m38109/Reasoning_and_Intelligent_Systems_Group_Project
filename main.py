@@ -111,18 +111,28 @@ def crossover(parent1, parent2):
             child[i][j]= parent2[i][j]
     return child
 
-# Updated mutation function (ensures only blank spaces are mutated)
 def mutation(grid, initial_grid):
-    """Mutate by swapping letters in originally blank positions."""
+    """Mutate by shifting entire rows left or right,  only if it doesn't introduce conflicts."""
     mutation_rate = 1 # Increase rate for testing (can be adjusted)
     for row in range(4):
         if random.random() < mutation_rate:
-            # Identify blank positions from the initial grid
-            empty_positions = [col for col in range(4) if initial_grid[row][col] == '']
-            if len(empty_positions) >= 2:
-                col1, col2 = random.sample(empty_positions, 2)  # Choose two different empty positions
-                grid[row][col1], grid[row][col2] = grid[row][col2], grid[row][col1]  # Swap them
+            blank_positions = [col for col in range(4) if initial_grid[row][col] == '']
+
+            if blank_positions:  # Only mutate if empty spots exist
+                shift_direction = random.choice(["left", "right"])
+                temp_grid = [r[:] for r in grid]  # Copy grid for simulation
+
+                if shift_direction == "left":
+                    temp_grid[row] = temp_grid[row][1:] + [temp_grid[row][0]]
+                else:
+                    temp_grid[row] = [temp_grid[row][-1]] + temp_grid[row][:-1]
+
+                # Check if mutation breaks constraints
+                if fitness(temp_grid) <= fitness(grid):  # Apply only if it improves or maintains fitness
+                    grid[row] = temp_grid[row]
+
     return grid
+
 
 """Main Genetic Algorithm Function"""
 def genetic_algorithm(population_size,tournament_size, initial_grid, max_generations):
