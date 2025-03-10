@@ -130,7 +130,6 @@ def mutation(grid, initial_grid):
                 # Check if mutation breaks constraints
                 if fitness(temp_grid) <= fitness(grid):  # Apply only if it improves or maintains fitness
                     grid[row] = temp_grid[row]
-
     return grid
 
 
