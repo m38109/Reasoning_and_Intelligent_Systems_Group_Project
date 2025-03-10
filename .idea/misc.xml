@@ -3,4 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="/opt/anaconda3" />
   </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Pipenv (Reasoning_and_Intelligent_Systems_Group_Project)" project-jdk-type="Python SDK" />
 </project>
