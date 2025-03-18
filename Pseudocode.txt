@@ -54,18 +54,23 @@ Function Crossover(parent1, parent2)
     return child
 End Function
 
-Function Mutation(grid)
+#Create mutation, set the rate to 10%
+Function Mutation(grid):
     mutation_rate = 0.1
-    For each row in grid Do
-        If Random number between 0 and 1 < mutation_rate Then
-            col1 = Random column index
-            col2 = Random column index (different from col1)
-            swap grid[row][col1] and grid[row][col2]
-        End If
+    For each row in grid Do:
+        IF Random number < mutation_rate THEN:
+            ROTATE ROW left or right
     End For
     return grid
 End Function
 
+#Main Genetic algorithm function
+#1. Create initial population
+#2. Calculate the fitness
+#3. Select parents
+#4. Crossover
+#5. Allow Mutation
+#5. Terminate if fitness is 0
 Function GeneticAlgorithm(initial_grid, max_generations, tournament_size, population_size, target_word)
     population = InitializePopulation(population_size, initial_grid)
     solutions = {}
@@ -93,4 +98,57 @@ Function GeneticAlgorithm(initial_grid, max_generations, tournament_size, popula
 
     Return Solutions or "No solution found, reached the max generation"
 
+End Function
+
+# Utility Functions
+
+Function CountRowConflicts(grid)
+    row_conflict = 0
+    For each row in grid Do
+        uniqueLetters = CountDistinct(row)
+        row_conflict = row_conflict + (GridSize - uniqueLetters)  # Calculate conflicts
+    End For
+    Return row_conflict
+End Function
+
+Function CountColumnConflicts(grid)
+    column_conflict = 0
+    For col from 0 to GridSize - 1 Do
+        columnValues = GetColumn(grid, col)
+        uniqueLetters = CountDistinct(columnValues)
+        column_conflict = column_conflict + (GridSize - uniqueLetters) # Calculate conflicts
+    End For
+    Return column_conflict
+End Function
+
+Function CountSubGridConflicts(grid)
+    sub_grid_conflict = 0
+    For subRow from 0 to SubgridSize - 1 Do
+        For subCol from 0 to SubgridSize - 1 Do
+            subgridValues = GetSubgrid(grid, subRow, subCol)
+            uniqueLetters = CountDistinct(subgridValues)
+            sub_grid_conflict = sub_grid_conflict + (GridSize - uniqueLetters) # Calculate conflicts
+        End For
+    End For
+    Return sub_grid_conflict
+End Function
+
+Function GetColumn(grid, col):
+    columnValues = []
+    For row from 0 to GridSize - 1 Do:
+        columnValues.append(grid[row][col])
+    End For
+    Return columnValues
+End Function
+
+Function GetSubgrid(grid, subRow, subCol):
+    subgridValues = []
+    startRow = subRow * SubgridSize
+    startCol = subCol * SubgridSize
+    For row from startRow to startRow + SubgridSize - 1 Do:
+        For col from startCol to startCol + SubgridSize - 1 Do:
+            subgridValues.append(grid[row][col])
+        End For
+    End For
+    Return subgridValues
 End Function
