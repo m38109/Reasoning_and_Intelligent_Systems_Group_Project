@@ -1,35 +1,36 @@
 import copy
 import random
 
-LETTER = ['A', 'B', 'C', 'D']
+# Define grid and subgrid sizes dynamically
+GRID_SIZE = 4
+SUBGRID_SIZE = 2
+LETTER = ['A', 'B', 'C', 'D']  # Can be made dynamic if needed
 
-def initialize_population(population_size, grid):
+# Generate initial population of candidate grids
+# Each row gets filled with the missing letters in random order
+# This ensures that rows are always valid
+
+def initialize_population(size, grid):
     population = []
-    letter = set(LETTER)  # Define the complete set of letters
-
-    for _ in range(population_size):
+    for _ in range(size):
         new_grid = copy.deepcopy(grid)
-
         for row in new_grid:
-            existing_letters = set(row) - {''} # Get existing letters in the row
-            missing_letters = list(letter - existing_letters)  # Find missing letters
-            random.shuffle(missing_letters)  # Shuffle missing letters randomly
-
-            for i in range(len(row)):
-                if row[i] == '' and missing_letters:  # Fill empty cells if missing letters exist
-                    row[i] = missing_letters.pop()
-
+            existing_letters = [cell for cell in row if cell != '']
+            missing_letters = [letter for letter in LETTER if letter not in existing_letters]
+            empty_indices = [i for i, cell in enumerate(row) if cell == '']
+            random.shuffle(missing_letters)
+            for i, index in enumerate(empty_indices):
+                if i < len(missing_letters):
+                    row[index] = missing_letters[i]
         population.append(new_grid)
-
     return population
 
-
+# Compute the number of duplicate letters in columns, row and sub-grid (lower is better)
 def fitness(grid):
-    """Compute the number of duplicate letters in columns, row and sub-gird (lower is better)"""
     return count_row_conflicts(grid) + count_column_conflicts(grid) + count_subgrid_conflicts(grid)
 
+# Compute the number of row conflicts
 def count_row_conflicts(grid):
-    """Compute the number of row conflicts"""
     count_conflicts = 0
     for row in grid:
         letter_counts = {}  # Dictionary to count letter occurrences
@@ -41,10 +42,10 @@ def count_row_conflicts(grid):
                     letter_counts[letter] = 1  # First occurrence of letter
     return count_conflicts
 
+# Compute the number of column conflicts
 def count_column_conflicts(grid):
-    """Compute the number of column conflicts"""
     count_conflicts = 0
-    for col in range(4):
+    for col in range(GRID_SIZE):
         letter_counts = {}
         for row in grid:
             letter = row[col]
@@ -55,17 +56,14 @@ def count_column_conflicts(grid):
                     letter_counts[letter] = 1
     return count_conflicts
 
+# Compute the number of subgrid conflicts
 def count_subgrid_conflicts(grid):
-    """Compute the number of subgrid conflicts"""
     count_conflicts = 0
-    subgrid_size = 2
-
-    for start_row in [0,2]:
-        for start_col in [0,2]:
+    for start_row in range(0, GRID_SIZE, SUBGRID_SIZE):
+        for start_col in range(0, GRID_SIZE, SUBGRID_SIZE):
             letter_counts = {}
-
-            for i in range(start_row,start_row+subgrid_size):
-                for j in range(start_col,start_col+subgrid_size):
+            for i in range(start_row, start_row + SUBGRID_SIZE):
+                for j in range(start_col, start_col + SUBGRID_SIZE):
                     letter = grid[i][j]
                     if letter:
                         if letter in letter_counts:
@@ -74,10 +72,10 @@ def count_subgrid_conflicts(grid):
                             letter_counts[letter] = 1
     return count_conflicts
 
-#select parents with tournament method
+# Select the best individual among randomly chosen subset of the population
 def tournament_selection(population, tournament_size):
     best_individual = None
-    best_fitness = float('inf') # the best solution is the one with the lowest fitness
+    best_fitness = float('inf')  # the best solution is the one with the lowest fitness
 
     for _ in range(tournament_size):
         candidate = random.choice(population)
@@ -87,8 +85,8 @@ def tournament_selection(population, tournament_size):
             best_fitness = candidate_fitness
     return best_individual
 
+# Select two different individuals using tournament selection
 def parent_selection(population, tournament_size):
-    """Select different individual as parents"""
     parent1 = tournament_selection(population, tournament_size)
 
     while True:
@@ -97,26 +95,23 @@ def parent_selection(population, tournament_size):
             break
     return parent1, parent2
 
-
+# Crossover between parent1 and parent2 by swapping entire rows
+# to ensure row validity is preserved
 def crossover(parent1, parent2):
-    """Crossover between parent1 and parent2"""
-    crossover_point = random.randint(1,3)
+    crossover_point = random.randint(1, GRID_SIZE - 1)
     child = copy.deepcopy(parent1)
 
-    """Swap the entire row to ensure row validity"""
-    for i in range(crossover_point,4):
-        """From the crossover_point row to the last row"""
-        for j in range(4):
-            """Swap all four columns values"""""
-            child[i][j]= parent2[i][j]
+    for i in range(crossover_point, GRID_SIZE):
+        for j in range(GRID_SIZE):
+            child[i][j] = parent2[i][j]
     return child
 
+# Mutate by shifting entire rows left or right, only if it doesn't introduce conflicts
 def mutation(grid, initial_grid):
-    """Mutate by shifting entire rows left or right,  only if it doesn't introduce conflicts."""
-    mutation_rate = 1 # Increase rate for testing (can be adjusted)
-    for row in range(4):
+    mutation_rate = 1  # Increase rate for testing (can be adjusted)
+    for row in range(GRID_SIZE):
         if random.random() < mutation_rate:
-            blank_positions = [col for col in range(4) if initial_grid[row][col] == '']
+            blank_positions = [col for col in range(GRID_SIZE) if initial_grid[row][col] == '']
 
             if blank_positions:  # Only mutate if empty spots exist
                 shift_direction = random.choice(["left", "right"])
@@ -132,14 +127,13 @@ def mutation(grid, initial_grid):
                     grid[row] = temp_grid[row]
     return grid
 
-
-"""Main Genetic Algorithm Function"""
-def genetic_algorithm(population_size,tournament_size, initial_grid, max_generations):
+# Main Genetic Algorithm Function
+def genetic_algorithm(population_size, tournament_size, initial_grid, max_generations):
     # prepare initial population
     population = initialize_population(population_size, initial_grid)
-    solutions={}
+    solutions = {}
 
-    for generation in range(1, max_generations+1):
+    for generation in range(1, max_generations + 1):
         population.sort(key=fitness)
 
         for individual in population:
@@ -169,23 +163,20 @@ def genetic_algorithm(population_size,tournament_size, initial_grid, max_generat
             best_dup = fitness(population[0])
             print(f"Generation {generation}: Best fitness = {best_dup}")
 
-    return [(list(map(list, sol)), gen) for sol, gen in
-            solutions.items()] if solutions else "No solution found, reached the max generation"
+    return [(list(map(list, sol)), gen) for sol, gen in solutions.items()] if solutions else "No solution found, reached the max generation"
 
-
-# Example usage
-
-
+# Print solution grid
 def print_grid(grid):
     for row in grid:
         print(" ".join(row))
 
-
+# Define initial grid
 initial_grid = [['C', '', '', 'D'],
                 ['', '', 'A', ''],
                 ['', '', '', ''],
                 ['D', '', '', 'A']]
 
+# Run the algorithm
 solutions = genetic_algorithm(population_size=20, tournament_size=3, initial_grid=initial_grid, max_generations=500)
 if isinstance(solutions, str):
     print(solutions)
@@ -195,9 +186,3 @@ else:
         print(f"Solution {idx} (Found at Generation {gen}):")
         print_grid(sol)
         print()
-
-
-
-
-
-
